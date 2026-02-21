@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:dayz/core/theme/app_theme.dart';
 import 'package:dayz/features/anniversary/presentation/providers/anniversary_provider.dart';
 
+import 'add_anniversary_sheet.dart';
+
 /// A visually striking card showing "Days Together" with a romantic
 /// peach/pink gradient and large day counter typography.
 class AnniversaryCard extends ConsumerWidget {
@@ -35,7 +37,7 @@ class AnniversaryCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row with emoji and title.
+            // Header row with emoji, title, and add button.
             Row(
               children: [
                 const Text('💕', style: TextStyle(fontSize: 22)),
@@ -49,6 +51,12 @@ class AnniversaryCard extends ConsumerWidget {
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                IconButton(
+                  onPressed: () => AddAnniversarySheet.show(context),
+                  icon: const Icon(Icons.edit_calendar),
+                  color: RomanticColors.roseDark.withValues(alpha: 0.7),
+                  tooltip: 'Edit Anniversary',
                 ),
               ],
             ),
@@ -80,7 +88,7 @@ class AnniversaryCard extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
 
             // Footer — start date.
             Row(
@@ -140,6 +148,16 @@ class _EmptyAnniversaryCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
         child: Column(
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                onPressed: () => AddAnniversarySheet.show(context),
+                icon: const Icon(Icons.add_circle_outline),
+                iconSize: 28,
+                color: RomanticColors.roseDark.withValues(alpha: 0.7),
+                tooltip: 'Add Anniversary',
+              ),
+            ),
             const Text('💕', style: TextStyle(fontSize: 36)),
             const SizedBox(height: 16),
             Text(
