@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'core/theme/app_theme.dart';
+import 'app.dart';
 import 'features/anniversary/data/models/anniversary.dart';
 import 'features/anniversary/presentation/providers/anniversary_provider.dart';
-import 'features/home/presentation/home_screen.dart';
 import 'features/streak/data/models/streak.dart';
 import 'features/streak/presentation/providers/streak_provider.dart';
 
@@ -34,22 +33,7 @@ Future<void> main() async {
         anniversaryBoxProvider.overrideWithValue(anniversaryBox),
         streakBoxProvider.overrideWithValue(streakBox),
       ],
-      child: const DayzApp(),
+      child: const App(),
     ),
   );
-}
-
-/// Root widget for the Dayz application.
-class DayzApp extends StatelessWidget {
-  const DayzApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dayz',
-      debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      home: const HomeScreen(),
-    );
-  }
 }
