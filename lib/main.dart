@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'core/theme/app_theme.dart';
 import 'features/anniversary/data/models/anniversary.dart';
 import 'features/anniversary/presentation/providers/anniversary_provider.dart';
+import 'features/home/presentation/home_screen.dart';
 import 'features/streak/data/models/streak.dart';
 import 'features/streak/presentation/providers/streak_provider.dart';
 
@@ -46,15 +48,8 @@ class DayzApp extends StatelessWidget {
     return MaterialApp(
       title: 'Dayz',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Dayz — Coming Soon'),
-        ),
-      ),
+      theme: lightTheme,
+      home: const HomeScreen(),
     );
   }
 }
