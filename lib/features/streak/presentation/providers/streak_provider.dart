@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
@@ -31,18 +32,21 @@ class StreakNotifier extends Notifier<List<Streak>> {
     return ref.watch(streakRepositoryProvider).getAll();
   }
 
-  /// Adds a new streak with the given [title] and [startDate].
+  /// Adds a new streak with the given [title], [startDate], and [colorIndex].
   Future<void> add({
     required String title,
     required DateTime startDate,
+    int colorIndex = 0,
   }) async {
     final streak = Streak(
-      id: _uuid.v4(),
+      id: const Uuid().v4(),
       title: title,
       startDate: startDate,
+      colorIndex: colorIndex,
     );
     await ref.read(streakRepositoryProvider).add(streak);
     state = [...state, streak];
+    debugPrint('Total streaks in state: ${state.length}');
   }
 
   /// Performs a check-in on the streak with the given [id].

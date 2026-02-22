@@ -96,142 +96,196 @@ class HomeScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: CanvasColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          elevation: 8,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Dialog header.
-                Row(
+        int selectedColorIndex = 0;
+
+        return StatefulBuilder(
+          builder: (dialogContext, setState) {
+            return Dialog(
+              backgroundColor: CanvasColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              elevation: 8,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text('🔥', style: TextStyle(fontSize: 24)),
-                    const SizedBox(width: 10),
-                    Text(
-                      'New Streak',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: DisciplineColors.accent,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Title input field.
-                TextField(
-                  key: const Key('streakTitleField'),
-                  controller: titleController,
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: CanvasColors.textPrimary,
-                    fontSize: 16,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Morning Run, Reading…',
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: CanvasColors.textMuted,
-                    ),
-                    filled: true,
-                    fillColor: CanvasColors.background,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: DisciplineColors.accent.withValues(alpha: 0.4),
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Action buttons.
-                Row(
-                  children: [
-                    // Cancel.
-                    Expanded(
-                      child: TextButton(
-                        key: const Key('cancelStreakBtn'),
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: CanvasColors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Save button.
-                    Expanded(
-                      child: ElevatedButton(
-                        key: const Key('saveStreakBtn'),
-                        onPressed: () {
-                          final title = titleController.text.trim();
-                          if (title.isEmpty) return;
-
-                          ref.read(streakListProvider.notifier).add(
-                                title: title,
-                                startDate: DateTime.now(),
-                              );
-
-                          Navigator.of(dialogContext).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: DisciplineColors.accent,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(
+                    // Dialog header.
+                    Row(
+                      children: [
+                        const Text('🔥', style: TextStyle(fontSize: 24)),
+                        const SizedBox(width: 10),
+                        Text(
+                          'New Streak',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: DisciplineColors.accent,
+                            fontSize: 20,
                             fontWeight: FontWeight.w700,
-                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Title input field.
+                    TextField(
+                      key: const Key('streakTitleField'),
+                      controller: titleController,
+                      autofocus: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: CanvasColors.textPrimary,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'e.g. Morning Run, Reading…',
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: CanvasColors.textMuted,
+                        ),
+                        filled: true,
+                        fillColor: CanvasColors.background,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: DisciplineColors.accent.withValues(alpha: 0.4),
+                            width: 1.5,
                           ),
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 20),
+
+                    // Color picker.
+                    Text(
+                      'Theme Color',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: CanvasColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(
+                        DisciplineColors.streakColors.length,
+                        (index) {
+                          final color = DisciplineColors.streakColors[index];
+                          final isSelected = selectedColorIndex == index;
+                          return GestureDetector(
+                            onTap: () => setState(() => selectedColorIndex = index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected ? Colors.black26 : Colors.transparent,
+                                  width: isSelected ? 3 : 0,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: color.withOpacity(0.5),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        )
+                                      ]
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Action buttons.
+                    Row(
+                      children: [
+                        // Cancel.
+                        Expanded(
+                          child: TextButton(
+                            key: const Key('cancelStreakBtn'),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                color: CanvasColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // Save button.
+                        Expanded(
+                          child: ElevatedButton(
+                            key: const Key('saveStreakBtn'),
+                            onPressed: () {
+                              final title = titleController.text.trim();
+                              if (title.isEmpty) return;
+
+                              ref.read(streakListProvider.notifier).add(
+                                    title: title,
+                                    startDate: DateTime.now(),
+                                    colorIndex: selectedColorIndex,
+                                  );
+
+                              Navigator.of(dialogContext).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: DisciplineColors.accent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Save',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

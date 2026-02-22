@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:dayz/core/theme/app_theme.dart';
 import 'package:dayz/features/anniversary/presentation/providers/anniversary_provider.dart';
+import 'package:dayz/features/shared/presentation/widgets/card_options_sheet.dart';
+import 'package:dayz/features/shared/presentation/widgets/safe_delete_dialog.dart';
 
 import 'add_anniversary_sheet.dart';
 
@@ -26,15 +29,32 @@ class AnniversaryCard extends ConsumerWidget {
     final days = anniversary.daysSinceStart;
     final formattedDate = DateFormat.yMMMd().format(anniversary.startDate);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: RomanticColors.cardGradient,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onLongPress: () {
+          HapticFeedback.mediumImpact();
+          CardOptionsSheet.show(
+            context: context,
+            onEdit: () => AddAnniversarySheet.show(context),
+            onDelete: () async {
+              final confirm = await SafeDeleteDialog.show(context);
+              if (confirm) {
+                ref.read(anniversaryListProvider.notifier).delete(anniversary.id);
+              }
+            },
+          );
+        },
         borderRadius: cardBorderRadius,
-        boxShadow: softCardShadow,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-        child: Column(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: RomanticColors.cardGradient,
+            borderRadius: cardBorderRadius,
+            boxShadow: softCardShadow,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header row with emoji, title, and add button.
@@ -127,7 +147,9 @@ class AnniversaryCard extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

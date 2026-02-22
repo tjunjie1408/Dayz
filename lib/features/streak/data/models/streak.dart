@@ -33,6 +33,14 @@ class Streak extends HiveObject {
   @HiveField(5)
   final int longestStreak;
 
+  /// The dates when the user successfully checked in (truncated to local date).
+  @HiveField(6)
+  final List<DateTime> history;
+
+  /// The index of the color assigned to this streak.
+  @HiveField(7, defaultValue: 0)
+  final int colorIndex;
+
   Streak({
     required this.id,
     required this.title,
@@ -40,7 +48,10 @@ class Streak extends HiveObject {
     DateTime? lastCheckIn,
     this.currentStreak = 0,
     this.longestStreak = 0,
+    List<DateTime>? history,
+    this.colorIndex = 0,
   })  : startDate = DateTime(startDate.year, startDate.month, startDate.day),
+        history = history ?? [],
         lastCheckIn = lastCheckIn != null
             ? DateTime(
                 lastCheckIn.year, lastCheckIn.month, lastCheckIn.day)
@@ -84,6 +95,8 @@ class Streak extends HiveObject {
       lastCheckIn: todayOnly,
       currentStreak: newStreak,
       longestStreak: newLongest,
+      history: [...history, todayOnly],
+      colorIndex: colorIndex,
     );
   }
 
@@ -96,6 +109,8 @@ class Streak extends HiveObject {
       lastCheckIn: null,
       currentStreak: 0,
       longestStreak: longestStreak,
+      history: history,
+      colorIndex: colorIndex,
     );
   }
 
@@ -107,6 +122,8 @@ class Streak extends HiveObject {
     DateTime? lastCheckIn,
     int? currentStreak,
     int? longestStreak,
+    List<DateTime>? history,
+    int? colorIndex,
   }) {
     return Streak(
       id: id ?? this.id,
@@ -115,6 +132,8 @@ class Streak extends HiveObject {
       lastCheckIn: lastCheckIn ?? this.lastCheckIn,
       currentStreak: currentStreak ?? this.currentStreak,
       longestStreak: longestStreak ?? this.longestStreak,
+      history: history ?? this.history,
+      colorIndex: colorIndex ?? this.colorIndex,
     );
   }
 
@@ -131,5 +150,6 @@ class Streak extends HiveObject {
   @override
   String toString() => 'Streak(id: $id, title: $title, '
       'startDate: $startDate, lastCheckIn: $lastCheckIn, '
-      'currentStreak: $currentStreak, longestStreak: $longestStreak)';
+      'currentStreak: $currentStreak, longestStreak: $longestStreak, '
+      'history: $history, colorIndex: $colorIndex)';
 }

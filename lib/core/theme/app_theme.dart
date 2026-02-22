@@ -43,6 +43,14 @@ class DisciplineColors {
       Color(0xFFCDE9F7),
     ],
   );
+
+  static const List<Color> streakColors = [
+    Color(0xFFA8E6CF), // Mint
+    Color(0xFFFDD6C4), // Peach
+    Color(0xFFCDE9F7), // Soft Blue
+    Color(0xFFE2C9F3), // Lavender
+    Color(0xFFFDF0CB), // Soft Butter
+  ];
 }
 
 /// Neutral canvas tones.

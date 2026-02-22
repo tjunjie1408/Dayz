@@ -23,13 +23,15 @@ class StreakAdapter extends TypeAdapter<Streak> {
       lastCheckIn: fields[3] as DateTime?,
       currentStreak: fields[4] as int,
       longestStreak: fields[5] as int,
+      history: (fields[6] as List?)?.cast<DateTime>(),
+      colorIndex: fields[7] == null ? 0 : fields[7] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Streak obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +43,11 @@ class StreakAdapter extends TypeAdapter<Streak> {
       ..writeByte(4)
       ..write(obj.currentStreak)
       ..writeByte(5)
-      ..write(obj.longestStreak);
+      ..write(obj.longestStreak)
+      ..writeByte(6)
+      ..write(obj.history)
+      ..writeByte(7)
+      ..write(obj.colorIndex);
   }
 
   @override

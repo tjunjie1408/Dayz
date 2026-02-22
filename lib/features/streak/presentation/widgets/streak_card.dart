@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:dayz/core/theme/app_theme.dart';
-import 'package:dayz/features/streak/presentation/providers/streak_provider.dart';
+import 'package:go_router/go_router.dart';
 
-/// A calming card displaying the current streak with a prominent
-/// "Check In Today" button and a cool mint/sky-blue gradient.
+import 'package:dayz/core/theme/app_theme.dart';
+import 'package:dayz/features/streak/data/models/streak.dart';
+import 'package:dayz/features/streak/presentation/providers/streak_provider.dart';
+import 'package:dayz/features/shared/presentation/widgets/card_options_sheet.dart';
+import 'package:dayz/features/shared/presentation/widgets/safe_delete_dialog.dart';
+
+/// Container widget that watches [streakListProvider] and renders
+/// a [SingleStreakCard] for every streak, or an empty-state placeholder.
 class StreakCard extends ConsumerWidget {
   const StreakCard({super.key});
 
@@ -19,234 +25,133 @@ class StreakCard extends ConsumerWidget {
       return _EmptyStreakCard(theme: theme);
     }
 
-    final streak = streaks.first;
-    final isCheckedInToday = _isToday(streak.lastCheckIn);
+    // Render ALL streaks as individual cards.
+    return Column(
+      children: [
+        for (int i = 0; i < streaks.length; i++) ...[
+          SingleStreakCard(streak: streaks[i]),
+          if (i < streaks.length - 1) const SizedBox(height: 16),
+        ],
+      ],
+    );
+  }
+}
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: DisciplineColors.cardGradient,
+/// A single streak card with tap-to-detail and long-press options.
+class SingleStreakCard extends ConsumerWidget {
+  const SingleStreakCard({super.key, required this.streak});
+
+  final Streak streak;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          GoRouter.of(context).push('/streak/${streak.id}');
+        },
+        onLongPress: () {
+          HapticFeedback.mediumImpact();
+          CardOptionsSheet.show(
+            context: context,
+            onEdit: () {
+              // TODO: Implement Edit Streak Sheet
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Edit Streak coming soon!')),
+              );
+            },
+            onDelete: () async {
+              final confirm = await SafeDeleteDialog.show(context);
+              if (confirm) {
+                ref.read(streakListProvider.notifier).delete(streak.id);
+              }
+            },
+          );
+        },
         borderRadius: cardBorderRadius,
-        boxShadow: softCardShadow,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header.
-            Row(
+        child: Container(
+          decoration: BoxDecoration(
+            color: DisciplineColors.streakColors[
+                streak.colorIndex % DisciplineColors.streakColors.length],
+            borderRadius: cardBorderRadius,
+            boxShadow: softCardShadow,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('🔥', style: TextStyle(fontSize: 22)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    streak.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: DisciplineColors.accent,
-                      fontWeight: FontWeight.w600,
+                // Header.
+                Row(
+                  children: [
+                    const Text('🔥', style: TextStyle(fontSize: 22)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        streak.title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: DisciplineColors.accent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Streak counter — hero.
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        '${streak.currentStreak}',
+                        style: theme.textTheme.displayLarge?.copyWith(
+                          fontSize: 80,
+                          fontWeight: FontWeight.w100,
+                          color: DisciplineColors.accent,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        streak.currentStreak == 1 ? 'day streak' : 'days streak',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: DisciplineColors.accent.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Longest streak badge.
+                Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: DisciplineColors.accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Best: ${streak.longestStreak} days',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: DisciplineColors.accent.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 20),
-
-            // Streak counter — hero.
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    '${streak.currentStreak}',
-                    style: theme.textTheme.displayLarge?.copyWith(
-                      fontSize: 80,
-                      fontWeight: FontWeight.w100,
-                      color: DisciplineColors.accent,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    streak.currentStreak == 1 ? 'day streak' : 'days streak',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: DisciplineColors.accent.withValues(alpha: 0.6),
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Longest streak badge.
-            Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: DisciplineColors.accent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Best: ${streak.longestStreak} days',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: DisciplineColors.accent.withValues(alpha: 0.7),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Check-in button.
-            Center(
-              child: _CheckInButton(
-                isCheckedIn: isCheckedInToday,
-                onPressed: isCheckedInToday
-                    ? null
-                    : () => ref
-                        .read(streakListProvider.notifier)
-                        .checkIn(streak.id),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Whether the given [date] is today (local time, date-only).
-  bool _isToday(DateTime? date) {
-    if (date == null) return false;
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
-  }
-}
-
-// ─── Check-In Button with Scale Animation ────────────────────────────────────
-
-class _CheckInButton extends StatefulWidget {
-  const _CheckInButton({
-    required this.isCheckedIn,
-    required this.onPressed,
-  });
-
-  final bool isCheckedIn;
-  final VoidCallback? onPressed;
-
-  @override
-  State<_CheckInButton> createState() => _CheckInButtonState();
-}
-
-class _CheckInButtonState extends State<_CheckInButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleTapDown(TapDownDetails _) => _controller.forward();
-
-  void _handleTapUp(TapUpDetails _) {
-    _controller.reverse();
-    widget.onPressed?.call();
-  }
-
-  void _handleTapCancel() => _controller.reverse();
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.isCheckedIn) {
-      // Already checked in — show muted completed state.
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        decoration: BoxDecoration(
-          color: DisciplineColors.accent.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.check_circle_rounded,
-              size: 20,
-              color: DisciplineColors.accent.withValues(alpha: 0.7),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Checked In Today',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: DisciplineColors.accent.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Active button with scale animation.
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          decoration: BoxDecoration(
-            color: DisciplineColors.accent,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: DisciplineColors.accent.withValues(alpha: 0.35),
-                blurRadius: 16,
-                spreadRadius: 0,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.bolt_rounded,
-                size: 22,
-                color: Colors.white,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Check In Today',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
           ),
         ),
       ),
@@ -264,7 +169,7 @@ class _EmptyStreakCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: DisciplineColors.cardGradient,
+        color: DisciplineColors.streakColors[0],
         borderRadius: cardBorderRadius,
         boxShadow: softCardShadow,
       ),
