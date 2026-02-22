@@ -17,6 +17,7 @@ void main() {
       expect(streak.lastCheckIn, isNull);
       expect(streak.currentStreak, 0);
       expect(streak.longestStreak, 0);
+      expect(streak.history, isEmpty);
     });
 
     test('startDate and lastCheckIn store date-only', () {
@@ -46,6 +47,7 @@ void main() {
 
       expect(checked.currentStreak, 6);
       expect(checked.lastCheckIn, DateTime(2024, 2, 1));
+      expect(checked.history, contains(DateTime(2024, 2, 1)));
     });
 
     test('checkIn on same day is idempotent', () {
@@ -57,6 +59,7 @@ void main() {
         lastCheckIn: checkInDate,
         currentStreak: 3,
         longestStreak: 5,
+        history: [checkInDate],
       );
 
       // Check in again on the same day — should return same instance.
@@ -64,6 +67,7 @@ void main() {
 
       expect(identical(result, streak), isTrue);
       expect(result.currentStreak, 3); // unchanged
+      expect(result.history.length, 1);
     });
 
     test('checkIn updates longest streak when exceeded', () {
@@ -79,6 +83,7 @@ void main() {
 
       expect(checked.currentStreak, 10);
       expect(checked.longestStreak, 10);
+      expect(checked.history, contains(DateTime(2024, 2, 1)));
     });
 
     test('checkIn does not update longest streak when not exceeded', () {
@@ -94,6 +99,7 @@ void main() {
 
       expect(checked.currentStreak, 4);
       expect(checked.longestStreak, 20); // unchanged
+      expect(checked.history, contains(DateTime(2024, 2, 1)));
     });
 
     test('reset sets streak to zero but preserves longest', () {
@@ -104,6 +110,7 @@ void main() {
         lastCheckIn: DateTime(2024, 6, 15),
         currentStreak: 15,
         longestStreak: 30,
+        history: [DateTime(2024, 6, 15)],
       );
 
       final result = streak.reset();
@@ -113,6 +120,7 @@ void main() {
       expect(result.lastCheckIn, isNull);
       expect(result.id, streak.id);
       expect(result.title, streak.title);
+      expect(result.history, [DateTime(2024, 6, 15)]); // preserved
     });
 
     test('daysSinceStart uses truncated local dates', () {
@@ -146,6 +154,7 @@ void main() {
         startDate: DateTime(2024, 1, 1),
         currentStreak: 5,
         longestStreak: 10,
+        history: [DateTime(2024, 1, 1)],
       );
 
       final modified = original.copyWith(
@@ -157,6 +166,7 @@ void main() {
       expect(modified.title, 'Modified');
       expect(modified.currentStreak, 0);
       expect(modified.longestStreak, 10);
+      expect(modified.history, [DateTime(2024, 1, 1)]);
     });
 
     test('equality is based on id', () {

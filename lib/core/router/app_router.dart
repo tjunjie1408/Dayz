@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/streak/presentation/screens/streak_detail_screen.dart';
 
 /// Application router configuration.
 ///
@@ -15,6 +16,13 @@ final appRouterProvider = Provider<GoRouter>(
       GoRoute(
         path: '/',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/streak/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return StreakDetailScreen(streakId: id);
+        },
       ),
     ],
   ),

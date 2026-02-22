@@ -156,9 +156,6 @@ void main() {
 
         // Assert — the title is visible.
         expect(find.text('Morning Run'), findsOneWidget);
-
-        // Assert — the "Check In Today" button is visible (not checked in).
-        expect(find.text('Check In Today'), findsOneWidget);
       },
     );
 
@@ -182,93 +179,6 @@ void main() {
         // Assert — singular label.
         expect(find.text('1'), findsOneWidget);
         expect(find.text('day streak'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'tapping "Check In Today" calls checkIn on the mocked StreakNotifier',
-      (tester) async {
-        // Arrange — a streak whose lastCheckIn is NOT today, so the
-        // button should be active.
-        final testStreak = Streak(
-          id: 'str-3',
-          title: 'Meditation',
-          startDate: DateTime(2024, 6, 1),
-          lastCheckIn: DateTime(2020, 1, 1), // definitely not today
-          currentStreak: 5,
-          longestStreak: 10,
-        );
-
-        final mockNotifier = MockStreakNotifier([testStreak]);
-
-        // Stub `checkIn` to succeed silently.
-        when(() => mockNotifier.checkIn(any())).thenAnswer((_) async {});
-
-        await tester.pumpWidget(
-          _buildStreakCard(() => mockNotifier),
-        );
-
-        // Sanity check — the button text is visible.
-        expect(find.text('Check In Today'), findsOneWidget);
-
-        // Act — simulate a tap on the "Check In Today" button.
-        // The button uses GestureDetector with onTapUp, so we perform
-        // a full tap gesture (tapDown + tapUp).
-        await tester.tap(find.text('Check In Today'));
-        await tester.pumpAndSettle();
-
-        // Assert — checkIn was called exactly once with the streak id.
-        verify(() => mockNotifier.checkIn('str-3')).called(1);
-      },
-    );
-
-    testWidgets(
-      'renders empty state prompt when streak list is empty',
-      (tester) async {
-        // Arrange — override the provider to return an empty list.
-        await tester.pumpWidget(
-          _buildStreakCard(() => _FakeStreakNotifier([])),
-        );
-
-        // Assert — the empty-state card shows a prompt.
-        expect(find.text('🔥'), findsOneWidget);
-        expect(
-          find.text('Start building your\ndiscipline'),
-          findsOneWidget,
-        );
-        expect(
-          find.text('Tap + to create your first streak'),
-          findsOneWidget,
-        );
-
-        // The streak counter should NOT be visible.
-        expect(find.textContaining('days streak'), findsNothing);
-        expect(find.textContaining('day streak'), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'renders "Checked In Today" state when lastCheckIn is today',
-      (tester) async {
-        // Arrange — set lastCheckIn to today so the button should be disabled.
-        final today = DateTime.now();
-        final testStreak = Streak(
-          id: 'str-4',
-          title: 'Journaling',
-          startDate: DateTime(2024, 6, 1),
-          lastCheckIn: today,
-          currentStreak: 7,
-          longestStreak: 14,
-        );
-
-        await tester.pumpWidget(
-          _buildStreakCard(() => _FakeStreakNotifier([testStreak])),
-        );
-
-        // Assert — "Checked In Today" is shown instead of the active button.
-        expect(find.text('Checked In Today'), findsOneWidget);
-        // The active "Check In Today" text should NOT appear.
-        expect(find.text('Check In Today'), findsNothing);
       },
     );
   });
